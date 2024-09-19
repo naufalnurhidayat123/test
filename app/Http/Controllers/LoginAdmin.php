@@ -6,6 +6,7 @@ use App\Models\Admin;
 use App\Models\Category;
 use App\Models\PaketJoki;
 use Crypt;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 
@@ -21,19 +22,15 @@ class LoginAdmin extends Controller
 
     public function login(Request $request)
     {
-        $username = $request->username;
-        $password = $request->password;
-
-        $data = Admin::where('username', '=', $username)->get();
-        if (count($data) == 0) {
+        $data = Admin::where('username', '=', $request->username)->first();
+        if (!$data) {
             session()->flash('fail', 'Maaf Username atau Password salah');
             return view('admin/loginAdmin');
         }
-        $kocak = $data[0];
-        if ($kocak->password == $password) {
+        if (Hash::check($request->password, $data->password)) {
             Session::put('keyAdmin','ini token');
-            $categories = Category::all();
-            $paketjoki = PaketJoki::all();
+            // $categories = Category::all();
+            // $paketjoki = PaketJoki::all();
             return redirect('admin/dashboard');
         }
         session()->flash('fail', 'Maaf Username atau Password salah');
